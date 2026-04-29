@@ -1,0 +1,24 @@
+# ===========================================================
+# Acme Shop Demo — Python dependencies
+#
+# Acme Shop is a separate, minimal FastAPI application that
+# demonstrates how a third-party integrator consumes SpeakSecure
+# via the OAuth 2.0 authorization code flow. It is deployed as
+# its own Hugging Face Space, separate from SpeakSecure itself.
+#
+# Install with:
+#   pip install -r AcmeShopDemo/requirements.txt
+#
+# Tested on Python 3.11+.
+# ===========================================================
+
+# --- Web framework ---
+fastapi==0.115.0
+uvicorn==0.30.6
+python-multipart==0.0.12
+
+# --- Templating (server-side HTML) ---
+jinja2==3.1.6
+
+# --- HTTP client for the server-to-server token exchange ---
+httpx==0.27.2

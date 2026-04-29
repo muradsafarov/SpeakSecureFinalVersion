@@ -1,0 +1,37 @@
+# ===========================================================
+# SpeakSecure — Direct dependencies only (documentation)
+#
+# This file lists ONLY the 11 packages that SpeakSecure code
+# imports directly. All other packages in requirements.txt are
+# transitive dependencies (installed automatically by these).
+#
+# This file is for reference / documentation. For actual install,
+# use requirements.txt which has pinned transitive versions for
+# reproducibility.
+#
+#   pip install -r requirements.txt           # for deployment
+#   pip install -r requirements-direct.txt    # for fresh dev setup
+#                                              with latest compatible
+#                                              transitive versions
+# ===========================================================
+
+# Web framework
+fastapi==0.115.0
+uvicorn==0.30.6
+pydantic==2.9.2
+python-multipart==0.0.12
+
+# ML models
+torch==2.3.1
+torchaudio==2.3.1
+faster-whisper==1.0.3
+speechbrain==1.0.0
+silero-vad==5.1.2
+numpy==1.26.4
+
+# Logging
+loguru==0.7.2
+
+# Testing (optional — only for `pytest Tests/`)
+pytest==8.3.3
+pytest-asyncio==1.3.0

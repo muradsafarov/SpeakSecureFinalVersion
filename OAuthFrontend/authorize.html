@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  SpeakSecure — OAuth /authorize page
+
+  Single-purpose authentication surface — sign in only.
+  Account creation has been moved to the Demo standalone via
+  the redirectToRegister() flow (see authorize.js), following
+  the same pattern as Google/Microsoft OAuth screens. This
+  keeps /authorize focused: username → challenge → record → submit.
+
+  The backend substitutes four placeholders before sending this
+  file to the browser. They are wired into JS constants on load
+  and sent back to the backend with every /authorize/* call.
+  ============================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in with SpeakSecure</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/oauth-static/authorize.css">
+</head>
+<body>
+
+<div class="bg-overlay"></div>
+
+<div class="app">
+    <!-- ============ Top bar (logo only — no nav) ============ -->
+    <header class="nav">
+        <a class="logo" onclick="return false;">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+            </div>
+            <div class="logo-text">Speak<span>Secure</span></div>
+        </a>
+    </header>
+
+    <main class="main">
+
+        <!-- ===================================================
+             PAGE 1: SIGN IN
+             =================================================== -->
+        <div id="page-signin" class="page active">
+            <div class="form-narrow">
+
+                <!-- Integrator banner — outside the form-card so it stays
+                     visible when switching pages -->
+                <div class="integrator-banner">
+                    <span class="integrator-banner-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </span>
+                    <span><strong id="integrator-name-1"></strong> is requesting access to your SpeakSecure account.</span>
+                </div>
+
+                <div class="form-card">
+                    <div class="form-header">
+                        <div>
+                            <div class="form-title">Sign in</div>
+                            <div class="form-subtitle">Use your voice to authenticate</div>
+                        </div>
+                    </div>
+
+                    <!-- Step indicator -->
+                    <div class="steps-indicator">
+                        <span class="step-dot active" id="signin-step-1"></span>
+                        <span class="step-line"></span>
+                        <span class="step-dot" id="signin-step-2"></span>
+                        <span class="step-line"></span>
+                        <span class="step-dot" id="signin-step-3"></span>
+                    </div>
+
+                    <!-- Step 1: Username -->
+                    <div class="block">
+                        <div class="block-title"><span class="step-num">1</span> Your username</div>
+                        <input type="text" id="signin-user-id" class="input-field field-spaced"
+                               placeholder="e.g. alice" autocomplete="off">
+                        <button class="btn btn-outline" id="signin-get-challenge-btn"
+                                onclick="getChallenge()" disabled>Get my code</button>
+                    </div>
+
+                    <!-- Step 2: Challenge digits + record -->
+                    <div class="block" id="signin-challenge-card" style="display:none;">
+                        <div class="block-title"><span class="step-num">2</span> Say these digits aloud</div>
+                        <div class="challenge-display">
+                            <div class="challenge-digits" id="signin-challenge-digits"></div>
+                            <div class="challenge-hint">Speak clearly, one digit at a time</div>
+                            <div class="challenge-timer">
+                                Code expires in <strong id="signin-challenge-timer">60</strong>s
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Record -->
+                    <div class="block" id="signin-record-card" style="display:none;">
+                        <div class="block-title"><span class="step-num">3</span> Record your voice</div>
+                        <div class="record-area">
+                            <button class="record-btn" id="signin-record-btn"
+                                    onclick="toggleRecording('signin')">
+                                <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                                    <path d="M19 11a1 1 0 1 0-2 0 5 5 0 0 1-10 0 1 1 0 1 0-2 0 7 7 0 0 0 6 6.92V20H8a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2h-3v-2.08A7 7 0 0 0 19 11z"/>
+                                </svg>
+                            </button>
+                            <div class="record-label" id="signin-record-label">
+                                Tap the button and say the digits
+                            </div>
+                            <div class="record-timer" id="signin-timer">00:00</div>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button class="btn btn-primary" id="signin-submit-btn"
+                            onclick="submitSignin()" disabled style="display:none;">
+                        Sign me in
+                    </button>
+
+                    <!-- Result -->
+                    <div class="result" id="signin-result"></div>
+
+                    <!-- Don't have an account — redirect to Demo for registration.
+                         Mirrors how Google's OAuth screen sends you to accounts.google.com
+                         to create an account, then bounces you back. Keeps registration
+                         out of the OAuth flow context. -->
+                    <div class="page-switch">
+                        Don't have an account?
+                        <a onclick="redirectToRegister()">Create one →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register page intentionally removed — registration happens on the
+             main Demo standalone via redirectToRegister(). This /authorize page
+             is now strictly an authentication surface, single-purpose. -->
+    </main>
+</div>
+
+<!-- ===========================================================
+     INJECTED CONFIG + APP SCRIPTS
+     The backend replaces {{client_id}}, {{redirect_uri}},
+     {{state}} and {{integrator_name}} via simple template
+     substitution before serving this file.
+     =========================================================== -->
+<script>
+const CLIENT_ID       = "{{client_id}}";
+const REDIRECT_URI    = "{{redirect_uri}}";
+const STATE           = "{{state}}";
+const INTEGRATOR_NAME = "{{integrator_name}}";
+</script>
+<script src="/oauth-static/authorize.js"></script>
+
+</body>
+</html>

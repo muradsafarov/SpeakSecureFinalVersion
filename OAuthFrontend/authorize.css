@@ -1,0 +1,661 @@
+/* ===========================================================
+   SpeakSecure — /authorize Stylesheet
+   Single-purpose stylesheet for the OAuth sign-in page.
+   Extracted from the original style.css and trimmed to what's
+   actually used here (~50% smaller than the original) plus a
+   handful of new classes for the OAuth-specific UI (integrator
+   banner, page-switch link).
+   =========================================================== */
+
+:root {
+    --bg: #0a0b0f;
+    --surface: rgba(18, 19, 26, 0.75);
+    --surface-solid: #12131a;
+    --surface-hover: rgba(26, 27, 37, 0.85);
+    --border: rgba(42, 43, 53, 0.6);
+    --border-strong: #2a2b35;
+    --text: #e4e4e8;
+    --text-muted: #8b8b96;
+    --accent: #2d7ff9;
+    --accent-glow: rgba(45, 127, 249, 0.15);
+    --accent-glow-strong: rgba(45, 127, 249, 0.35);
+    --success: #00b894;
+    --success-bg: rgba(0, 184, 148, 0.1);
+    --danger: #e74c3c;
+    --danger-bg: rgba(231, 76, 60, 0.1);
+    --warning: #f39c12;
+    --warning-bg: rgba(243, 156, 18, 0.1);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --transition: 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+}
+
+/* Subtle radial-gradient background */
+.bg-overlay {
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(45, 127, 249, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(45, 127, 249, 0.05) 0%, transparent 50%),
+        linear-gradient(180deg, #0a0b0f 0%, #0f1119 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===========================================================
+   Header / logo
+   =========================================================== */
+.nav {
+    position: relative;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 48px;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    background: rgba(10, 11, 15, 0.5);
+}
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text);
+    text-decoration: none;
+    cursor: default;
+    transition: opacity 0.2s;
+}
+
+.logo:hover { opacity: 0.85; }
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), #5ba3f9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px var(--accent-glow-strong);
+    color: #fff;
+}
+
+.logo-icon svg { width: 22px; height: 22px; }
+
+.logo-text {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.logo-text span { color: var(--accent); }
+
+/* ===========================================================
+   Page transitions
+   =========================================================== */
+.main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.page {
+    display: none;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.page.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.form-narrow {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* ===========================================================
+   Integrator banner (new — OAuth-specific)
+   Sits above the form-card, makes it crystal clear which
+   third-party site initiated this login.
+   =========================================================== */
+.integrator-banner {
+    background: var(--accent-glow);
+    border: 1px solid rgba(45, 127, 249, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.integrator-banner strong { color: var(--text); }
+
+.integrator-banner-icon {
+    color: var(--accent);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* ===========================================================
+   Form card
+   =========================================================== */
+.form-card {
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.form-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.form-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ===========================================================
+   Step indicator
+   =========================================================== */
+.steps-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 32px;
+}
+
+.step-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    transition: all 0.4s;
+}
+
+.step-dot.active {
+    background: var(--accent);
+    width: 30px;
+    border-radius: 5px;
+    box-shadow: 0 0 12px var(--accent-glow-strong);
+}
+
+.step-dot.done { background: var(--success); }
+
+.step-line {
+    width: 30px;
+    height: 2px;
+    background: var(--border-strong);
+}
+
+/* ===========================================================
+   Form blocks
+   =========================================================== */
+.block { margin-bottom: 24px; }
+
+.block-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.block-title .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent-glow);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Input field */
+.input-field {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(10, 11, 15, 0.6);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.input-field:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    background: rgba(10, 11, 15, 0.9);
+}
+
+.input-field::placeholder { color: #555; }
+
+.input-field[readonly] {
+    background: rgba(42, 43, 53, 0.4);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+/* Spacing helpers */
+.field-spaced { margin-bottom: 12px; }
+
+/* ===========================================================
+   Record button
+   =========================================================== */
+.record-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 28px 0;
+}
+
+.record-btn {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    border: 3px solid var(--border-strong);
+    background: rgba(10, 11, 15, 0.8);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.record-btn:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 30px var(--accent-glow-strong);
+    transform: scale(1.05);
+}
+
+.record-btn.recording {
+    border-color: var(--danger);
+    animation: pulse-ring 1.5s infinite;
+}
+
+.record-btn .mic-icon {
+    width: 32px; height: 32px;
+    fill: var(--text-muted);
+    transition: fill 0.2s;
+}
+
+/* Locked state — set during in-flight verify requests.
+   Mirrors the disabled-and-dimmed look of the challenge button. */
+.record-btn.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+    transform: none;
+    animation: none;
+}
+
+.record-btn.locked .mic-icon { fill: var(--text-muted); }
+
+.record-btn:hover .mic-icon { fill: var(--accent); }
+
+.record-btn.recording .mic-icon { fill: var(--danger); }
+
+@keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+    70%  { box-shadow: 0 0 0 20px rgba(231, 76, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+.record-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.record-timer {
+    display: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.record-timer.visible { display: block; }
+.record-timer.active { color: var(--danger); }
+
+/* ===========================================================
+   Challenge display
+   =========================================================== */
+.challenge-display {
+    text-align: center;
+    padding: 24px 0;
+}
+
+.challenge-hint {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.challenge-hint em {
+    color: var(--text);
+    font-style: normal;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.challenge-digits {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 52px;
+    font-weight: 700;
+    letter-spacing: 18px;
+    color: var(--accent);
+    text-shadow: 0 0 30px var(--accent-glow-strong);
+    margin: 16px 0;
+    padding-left: 18px;
+}
+
+.challenge-timer {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.challenge-timer strong {
+    color: var(--warning);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* ===========================================================
+   Buttons
+   =========================================================== */
+.btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn:disabled,
+.btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+    box-shadow: none;
+    filter: grayscale(0.3);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent), #4a8ff9);
+    color: #fff;
+    box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 24px var(--accent-glow-strong);
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+.btn-outline:hover {
+    background: var(--accent-glow);
+}
+
+
+/* ===========================================================
+   Result box
+   =========================================================== */
+.result {
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-top: 20px;
+    display: none;
+    animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.result.visible { display: block; }
+
+.result.success {
+    background: var(--success-bg);
+    border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+.result.error {
+    background: var(--danger-bg);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.result.warning {
+    background: var(--warning-bg);
+    border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+.result-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.result.success .result-header { color: var(--success); }
+.result.error   .result-header { color: var(--danger); }
+.result.warning .result-header { color: var(--warning); }
+
+.result-details {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.result-details strong { color: var(--text); }
+
+/* Result table — friendly key/value rows */
+.result-table {
+    margin-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 10px;
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 13px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.04);
+}
+
+.result-row:last-child { border-bottom: none; }
+
+.result-row-label { color: var(--text-muted); }
+
+.result-row-value {
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    text-align: right;
+}
+
+/* ===========================================================
+   Spinner (used inside buttons during async ops)
+   =========================================================== */
+.spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===========================================================
+   Page switch link (Don't have an account? / Already have one?)
+   =========================================================== */
+.page-switch {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.page-switch a {
+    color: var(--accent);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.page-switch a:hover {
+    text-decoration: underline;
+}
+
+/* ===========================================================
+   Responsive
+   =========================================================== */
+@media (max-width: 600px) {
+    .nav { padding: 16px 20px; }
+    .main { padding: 24px 12px; }
+    .form-card { padding: 28px 22px; }
+    .challenge-digits { font-size: 40px; letter-spacing: 12px; padding-left: 12px; }
+    .logo-text { font-size: 16px; }
+}
+
+
+/* ===========================================================
+   Page-load staggered fade-in animation
+
+   Elements appear in sequence with a slight upward motion.
+   Order: integrator banner → form-card heading → form fields
+   → page-switch link. Same pattern Notion / Linear / Vercel use
+   — gentle but adds polish vs an instant flash on load.
+
+   Uses CSS animation rather than JS for two reasons:
+     1. Plays before any JS runs — no perceived lag
+     2. Honoured even if a script error blocks JS (resilient)
+   =========================================================== */
+
+@keyframes ssFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply animation to each major element of the signin page,
+   with staggered delays so they cascade in. animation-fill-mode
+   'both' keeps the from-state until the delay elapses (otherwise
+   elements would flash visible before fading in). */
+
+.integrator-banner,
+.form-card > h2,
+.form-card .step-indicator,
+.form-card .step,
+.form-card .form-actions,
+.form-card .signin-actions,
+.page-switch {
+    opacity: 0;
+    animation: ssFadeInUp 0.5s ease-out forwards;
+    animation-fill-mode: both;
+}
+
+.integrator-banner       { animation-delay: 0.05s; }
+.form-card > h2          { animation-delay: 0.20s; }
+.form-card .step-indicator { animation-delay: 0.28s; }
+.form-card .step         { animation-delay: 0.36s; }
+.form-card .form-actions { animation-delay: 0.44s; }
+.form-card .signin-actions { animation-delay: 0.44s; }
+.page-switch             { animation-delay: 0.55s; }
+
+/* Respect users who prefer reduced motion (accessibility, WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+    .integrator-banner,
+    .form-card > h2,
+    .form-card .step-indicator,
+    .form-card .step,
+    .form-card .form-actions,
+    .form-card .signin-actions,
+    .page-switch {
+        animation: none;
+        opacity: 1;
+    }
+}

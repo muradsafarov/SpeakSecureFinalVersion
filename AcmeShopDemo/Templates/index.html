@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<!--
+  Acme Shop — fake e-commerce landing page.
+  Deliberately styled differently from SpeakSecure (warm orange
+  rather than cool blue) so the user/supervisor can clearly see
+  these are two independent applications.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ shop_name }} — Premium Goods</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+        --bg: #fdfaf6;
+        --surface: #ffffff;
+        --text: #1a1a1a;
+        --text-muted: #666;
+        --accent: #e85a2a;
+        --accent-hover: #d04a1a;
+        --border: #e5e0d8;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+    }
+
+    /* Top navigation bar */
+    .nav {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 16px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .nav-logo {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: -0.5px;
+    }
+    .nav-links {
+        display: flex;
+        gap: 28px;
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+    .nav-links span { cursor: pointer; }
+    .nav-links span:hover { color: var(--text); }
+
+    /* Hero section */
+    .hero {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 80px 32px 60px;
+        text-align: center;
+    }
+    .hero-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        background: rgba(232, 90, 42, 0.1);
+        color: var(--accent);
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }
+    .hero-title {
+        font-size: 56px;
+        font-weight: 700;
+        letter-spacing: -1.5px;
+        line-height: 1.1;
+        max-width: 780px;
+        margin: 0 auto 20px;
+    }
+    .hero-title span { color: var(--accent); }
+    .hero-description {
+        font-size: 18px;
+        color: var(--text-muted);
+        max-width: 560px;
+        margin: 0 auto 40px;
+        line-height: 1.6;
+    }
+
+    /* Sign in card */
+    .signin-card {
+        max-width: 420px;
+        margin: 0 auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    }
+    .signin-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .signin-subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+
+    /* The "Sign in with SpeakSecure" button */
+    .speaksecure-btn {
+        width: 100%;
+        padding: 14px 20px;
+        background: #0a0b0f;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .speaksecure-btn:hover {
+        background: #1a1b1f;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+    /* SpeakSecure brand icon — small gradient square with a white mic glyph,
+       mirroring the logo on the SpeakSecure /authorize page so users see the
+       same identity mark across both surfaces (Google/Apple sign-in pattern). */
+    .speaksecure-btn-icon {
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #2d7ff9, #5ba3f9);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(45, 127, 249, 0.35);
+    }
+    .speaksecure-btn-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .signin-divider {
+        margin: 20px 0 16px;
+        text-align: center;
+        position: relative;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+    .signin-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0; right: 0;
+        height: 1px;
+        background: var(--border);
+        z-index: 0;
+    }
+    .signin-divider span {
+        background: var(--surface);
+        padding: 0 14px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .alt-signin-btn {
+        width: 100%;
+        padding: 12px 18px;
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 14px;
+        cursor: not-allowed;
+    }
+
+    .demo-note {
+        margin-top: 28px;
+        padding: 14px;
+        background: rgba(232, 90, 42, 0.06);
+        border-left: 3px solid var(--accent);
+        border-radius: 4px;
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+    .demo-note strong { color: var(--text); }
+
+    @media (max-width: 600px) {
+        .hero-title { font-size: 36px; }
+        .hero { padding: 40px 20px; }
+        .signin-card { padding: 24px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-logo">{{ shop_name }}</div>
+    <div class="nav-links">
+        <span>Shop</span>
+        <span>Collections</span>
+        <span>About</span>
+        <span>Cart (0)</span>
+    </div>
+</nav>
+
+<section class="hero">
+    <span class="hero-badge">New collection</span>
+    <h1 class="hero-title">Premium goods, <span>secured by your voice</span></h1>
+    <p class="hero-description">
+        Skip the password hassle. Sign in once with your voice and shop with peace of mind —
+        your account is protected by biometric authentication.
+    </p>
+
+    <div class="signin-card">
+        <div class="signin-title">Welcome back</div>
+        <div class="signin-subtitle">Sign in to access your cart and orders</div>
+
+        <a href="/login" class="speaksecure-btn">
+            <span class="speaksecure-btn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="2" width="6" height="12" rx="3"/>
+                    <path d="M5 10v1a7 7 0 0 0 14 0v-1"/>
+                    <line x1="12" y1="19" x2="12" y2="22"/>
+                    <line x1="8" y1="22" x2="16" y2="22"/>
+                </svg>
+            </span>
+            Sign in with SpeakSecure
+        </a>
+
+        <div class="signin-divider"><span>or</span></div>
+
+        <button class="alt-signin-btn" disabled>
+            Continue with email (coming soon)
+        </button>
+
+        <div class="demo-note">
+            <strong>This is a demo site.</strong> Acme Shop is a fake e-commerce
+            page that demonstrates how a real third-party application would
+            integrate with SpeakSecure via the OAuth 2.0 authorization
+            code flow.
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

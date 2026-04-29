@@ -1,0 +1,85 @@
+# ===========================================================
+# SpeakSecure — Git ignore
+# Files and folders that must NEVER be committed.
+# ===========================================================
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# === Virtual environments ===
+.venv/
+venv/
+env/
+ENV/
+
+# === IDE / editor ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# === Build / distribution ===
+build/
+dist/
+*.egg-info/
+*.egg
+
+# === Test / coverage artifacts ===
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# === Runtime data — re-created on every server start ===
+# Never commit these — they contain user voice profiles, API key
+# hashes, and runtime logs. The directories themselves will be
+# created automatically on first run.
+Data/Embeddings/*
+Data/Temp_Audio/*
+Data/Logs/*
+
+# Keep the directory structure but ignore contents
+!Data/Embeddings/.gitkeep
+!Data/Temp_Audio/.gitkeep
+!Data/Logs/.gitkeep
+
+# === Database — contains live API keys (hashed) and OAuth codes ===
+# CRITICAL: never commit. Each environment (dev / prod) must have
+# its own database. The schema is auto-created on first run.
+*.db
+*.sqlite
+*.sqlite3
+speaksecure.db
+
+# === Environment variable files ===
+# Local secrets must never be committed. On Hugging Face Spaces,
+# secrets are managed via the platform's "Variables and secrets"
+# UI instead.
+.env
+.env.local
+.env.*.local
+
+# === Misc ===
+*.log
+.cache/
+
+# === Local-only model weights (if downloaded outside the repo) ===
+# AASIST.pth IS committed (small, ~1.3 MB) — required for the model
+# to load. Other model weights are downloaded by HuggingFace Hub
+# at runtime and cached in ~/.cache, not in the repo.
+
+# === Cached model weights (auto-downloaded by SpeechBrain/torch) ===
+# SpeechBrain creates this folder on first model load. Files inside
+# (~20MB+) are re-downloaded automatically — no need to commit.
+pretrained_models/
+
+# AASIST weights — uploaded directly to HF Space via UI, not git
+Core/AASIST/AASIST.pth

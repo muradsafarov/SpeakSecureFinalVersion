@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<!--
+  Acme Shop dashboard — visible only after successful OAuth sign-in.
+  Same warm orange theme as the landing page so it's clear this is
+  the "third-party site", not SpeakSecure.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ shop_name }} — Welcome, {{ user_id }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+        --bg: #fdfaf6;
+        --surface: #ffffff;
+        --text: #1a1a1a;
+        --text-muted: #666;
+        --accent: #e85a2a;
+        --accent-hover: #d04a1a;
+        --border: #e5e0d8;
+        --success: #1f9d55;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+    }
+
+    /* Top navigation */
+    .nav {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 16px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .nav-logo {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: -0.5px;
+    }
+    .nav-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+    }
+    .nav-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 13px;
+    }
+    .logout-btn {
+        padding: 8px 16px;
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .logout-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    /* Welcome banner */
+    .welcome {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 60px 32px 30px;
+    }
+    .welcome-greeting {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+    }
+    .welcome-name {
+        font-size: 42px;
+        font-weight: 700;
+        letter-spacing: -1px;
+        line-height: 1.1;
+    }
+    .welcome-name span { color: var(--accent); }
+
+    /* Success message */
+    .success-banner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 32px 32px;
+    }
+    .success-banner-inner {
+        background: rgba(31, 157, 85, 0.08);
+        border: 1px solid rgba(31, 157, 85, 0.2);
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .success-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--success);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+    .success-text {
+        font-size: 14px;
+        color: var(--text);
+    }
+    .success-text strong { color: var(--success); }
+
+    /* Featured cards */
+    .featured {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 32px 60px;
+    }
+    .section-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        letter-spacing: -0.3px;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 20px;
+    }
+    .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+    .card-image {
+        width: 100%;
+        height: 180px;
+        background: linear-gradient(135deg, #f4ebe0, #e9d8c4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+    }
+    .card-body {
+        padding: 16px;
+    }
+    .card-name {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .card-price {
+        font-size: 14px;
+        color: var(--accent);
+        font-weight: 600;
+    }
+    .card-tag {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+    }
+
+    /* Bottom note about the demo */
+    .demo-info {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 32px 60px;
+    }
+    .demo-info-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.7;
+    }
+    .demo-info-card strong { color: var(--text); }
+    .demo-info-card code {
+        background: rgba(232, 90, 42, 0.08);
+        color: var(--accent);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+
+    @media (max-width: 600px) {
+        .welcome { padding: 40px 20px 20px; }
+        .welcome-name { font-size: 32px; }
+        .featured { padding: 0 20px 40px; }
+        .demo-info { padding: 0 20px 40px; }
+    }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-logo">{{ shop_name }}</div>
+    <div class="nav-user">
+        <div class="nav-avatar">{{ user_id[0]|upper }}</div>
+        <span>{{ user_id }}</span>
+        <a href="/logout" class="logout-btn">Sign out</a>
+    </div>
+</nav>
+
+<div class="welcome">
+    <div class="welcome-greeting">Welcome back,</div>
+    <div class="welcome-name"><span>{{ user_id }}</span></div>
+</div>
+
+<div class="success-banner">
+    <div class="success-banner-inner">
+        <div class="success-icon">✓</div>
+        <div class="success-text">
+            You signed in with <strong>SpeakSecure voice authentication</strong>.
+            No password was used.
+        </div>
+    </div>
+</div>
+
+<div class="featured">
+    <h2 class="section-title">Featured items</h2>
+    <div class="grid">
+        <div class="card">
+            <div class="card-image">🪑</div>
+            <div class="card-body">
+                <div class="card-tag">Furniture</div>
+                <div class="card-name">Walnut Lounge Chair</div>
+                <div class="card-price">$489</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-image">☕</div>
+            <div class="card-body">
+                <div class="card-tag">Kitchen</div>
+                <div class="card-name">Espresso Pour-Over Set</div>
+                <div class="card-price">$129</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-image">📚</div>
+            <div class="card-body">
+                <div class="card-tag">Library</div>
+                <div class="card-name">Leather-Bound Journal</div>
+                <div class="card-price">$45</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-image">🕯️</div>
+            <div class="card-body">
+                <div class="card-tag">Home</div>
+                <div class="card-name">Hand-Poured Candle Set</div>
+                <div class="card-price">$68</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="demo-info">
+    <div class="demo-info-card">
+        <strong>How this works:</strong> when you clicked "Sign in with SpeakSecure",
+        Acme Shop redirected you to <code>localhost:8000/api/v1/authorize</code> with a
+        registered <code>client_id</code> and <code>state</code>. After voice
+        verification, SpeakSecure redirected you back to <code>localhost:8001/callback</code>
+        with a one-time authorization code. Acme Shop's backend then exchanged that
+        code for your user identity via a server-to-server call to
+        <code>POST /api/v1/token</code>, authenticated with its API key.
+        This is the OAuth 2.0 authorization code grant — the same flow used by
+        "Sign in with Google" and "Sign in with GitHub".
+    </div>
+</div>
+
+</body>
+</html>
