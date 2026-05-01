@@ -31,7 +31,7 @@ const API_BASE = "/api/v1";
 //   the user identity without trusting their frontend), the OAuth
 //   flow at /api/v1/authorize is used instead — that's how Acme Shop
 //   integrates with SpeakSecure, not via this key.
-const API_KEY = "Here was a Key";
+const API_KEY = "SpeakSecure API Key";
 
 // Target sample rate for audio recording (must match backend)
 const SAMPLE_RATE = 16000;

@@ -1,13 +1,14 @@
 # ===========================================================
-# Acme Shop Demo — Configuration
+# Acme Shop Demo - Configuration
 #
 # This is a fake "third-party e-commerce site" used to demonstrate
 # how a real integrator would consume the SpeakSecure OAuth flow.
 #
-# Configurable values are loaded from environment variables so that
-# in production (Hugging Face Spaces) the SpeakSecure URL and the
-# API key can be set via the platform's secret manager rather than
-# hardcoded in source.
+# All configurable values are loaded from environment variables.
+# In production (Hugging Face Spaces) these are set via the
+# platform's "Variables and secrets" settings panel; in local
+# development you can either export them or rely on the defaults
+# below (which assume both apps run on localhost).
 # ===========================================================
 
 import os
@@ -15,7 +16,7 @@ import os
 # ----------- Where SpeakSecure lives -----------
 # In local development this is http://localhost:8000.
 # When deployed to HF Spaces this becomes the public Spaces URL,
-# e.g. https://murad-speaksecure.hf.space
+# e.g. https://NotDeadTed-speak-secure.hf.space
 SPEAKSECURE_BASE_URL = os.environ.get(
     "SPEAKSECURE_BASE_URL",
     "http://localhost:8000",
@@ -31,15 +32,17 @@ ACME_SHOP_BASE_URL = os.environ.get(
 )
 
 # ----------- Our API key -----------
-# Issued by SpeakSecure via the create_api_key.py CLI.
-# In production this would live in a secret manager — never in code.
-# For the demo, you can either set the env var or paste the key below.
+# Issued by SpeakSecure via the create_api_key.py CLI script.
+# In production this lives in the Hugging Face Spaces secret manager.
+# Never commit a real key to source control.
 SPEAKSECURE_API_KEY = os.environ.get(
     "SPEAKSECURE_API_KEY",
-    "Here has to be a key",  # Paste your key here for local dev, or set the env var
+    "PASTE_YOUR_API_KEY_HERE",
 )
 
 # ----------- Acme Shop server port -----------
+# Hugging Face Spaces expects the application to listen on 7860.
+# Locally we use 8001 to avoid clashing with SpeakSecure on 8000.
 ACME_SHOP_PORT = int(os.environ.get("ACME_SHOP_PORT", "8001"))
 
 # ----------- Derived URLs -----------
