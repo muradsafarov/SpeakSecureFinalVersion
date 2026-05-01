@@ -83,3 +83,5 @@ pretrained_models/
 
 # AASIST weights — uploaded directly to HF Space via UI, not git
 Core/AASIST/AASIST.pth
+
+README.md
