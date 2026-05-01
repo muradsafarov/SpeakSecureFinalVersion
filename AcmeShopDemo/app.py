@@ -1,22 +1,29 @@
 # ===========================================================
-# Acme Shop Demo — FastAPI Server
+# Acme Shop Demo - FastAPI Server
 #
 # A minimal "third-party site" that integrates with SpeakSecure
 # via the OAuth 2.0 authorization code flow.
 #
 # Routes:
-#   GET  /                  — landing page with "Sign in" button
-#   GET  /login             — generates state, redirects to SpeakSecure /authorize
-#   GET  /callback          — receives ?code=...&state=... from SpeakSecure,
-#                             exchanges code for user info via POST /token,
-#                             creates a session cookie, redirects to /dashboard
-#   GET  /dashboard         — protected page showing the signed-in user
-#   GET  /logout            — clears the session
+#   GET  /                  - landing page with "Sign in" button
+#                              (button opens SpeakSecure in a new tab)
+#   GET  /callback          - receives ?code=...&state=... from SpeakSecure,
+#                              exchanges code for user info via POST /token,
+#                              creates a session cookie, redirects to /dashboard
+#   GET  /dashboard         - protected page showing the signed-in user
+#   GET  /logout            - clears the session
 #
-# Sessions are stored in-memory (dict). Survive restarts? No, but
-# this is a demo — production would use Redis or a database.
-# CSRF protection via the OAuth state parameter, stored in a
-# short-lived cookie between /login and /callback.
+# Sessions are stored in-memory (dict). They survive only as long
+# as the server is running, but this is a demo - production would
+# use Redis or a database.
+#
+# CSRF protection via the OAuth state parameter, stored server-side
+# in pending_states. When the deployment runs inside a third-party
+# iframe (Hugging Face Spaces dashboard wrapper), the cookie-based
+# state check would fail because the new tab opened by the sign-in
+# button is a different browsing context. We therefore validate
+# the state purely against the in-memory dict, which is sufficient
+# for CSRF protection in this demo.
 # ===========================================================
 
 import secrets
@@ -41,13 +48,13 @@ templates = Jinja2Templates(directory="Templates")
 
 # ===========================================================
 # In-memory session store
-# Maps session_id (random cookie value) → user_id (from SpeakSecure)
+# Maps session_id (random cookie value) -> user_id (from SpeakSecure)
 # In production this would be Redis or a database.
 # ===========================================================
 sessions: dict[str, str] = {}
 
 # Pending OAuth state values waiting for callback.
-# Maps state → True (just a set of valid in-flight states).
+# Maps state -> True (just a set of valid in-flight states).
 # In production this would also be stored server-side keyed by
 # the user's session, with short TTL.
 pending_states: dict[str, bool] = {}
@@ -64,6 +71,27 @@ def get_user_from_session(session_id: str | None) -> str | None:
     return sessions.get(session_id)
 
 
+def build_authorize_url() -> str:
+    """
+    Generate a fresh authorize URL with a server-side state token.
+
+    Called from the home route so the rendered HTML can use a plain
+    <a target="_blank"> button - this is required to escape the
+    Hugging Face Spaces iframe sandbox, which blocks both
+    window.top.location and target="_top" but still allows new-tab
+    navigation.
+    """
+    state = secrets.token_urlsafe(32)
+    pending_states[state] = True
+
+    params = {
+        "client_id": SPEAKSECURE_API_KEY,
+        "redirect_uri": REDIRECT_URI,
+        "state": state,
+    }
+    return f"{SPEAKSECURE_BASE_URL}/api/v1/authorize?{urlencode(params)}"
+
+
 # ===========================================================
 # Routes
 # ===========================================================
@@ -76,65 +104,38 @@ async def home(
     """
     Landing page. If the user is signed in, redirect to dashboard.
     Otherwise show the "Sign in with SpeakSecure" button.
+
+    The button on the rendered page is an <a target="_blank"> that
+    points directly at the authorize URL we generate here, so the
+    OAuth flow opens in a top-level browsing context with full
+    microphone access (which is what voice biometrics requires).
     """
     user_id = get_user_from_session(acme_session)
     if user_id:
         return RedirectResponse(url="/dashboard", status_code=302)
 
+    if SPEAKSECURE_API_KEY == "PASTE_YOUR_API_KEY_HERE":
+        # Show a clear error in development if the key was never set
+        authorize_url = "/login-not-configured"
+    else:
+        authorize_url = build_authorize_url()
+
     return templates.TemplateResponse("index.html", {
         "request": request,
         "shop_name": "Acme Shop",
+        "authorize_url": authorize_url,
     })
 
 
-@app.get("/login")
-async def login():
-    """
-    Initiate the OAuth flow.
-
-    Steps:
-      1. Generate a random state value (CSRF token)
-      2. Remember it server-side AND set it in a short-lived cookie
-      3. Redirect the browser to SpeakSecure /authorize with all
-         the OAuth parameters
-
-    The state is the OAuth 2.0 anti-CSRF mechanism: when the user
-    comes back to /callback we'll verify that the state in the URL
-    matches the one we issued. If not, the request is rejected.
-    """
-    if SPEAKSECURE_API_KEY == "PASTE_YOUR_API_KEY_HERE":
-        return HTMLResponse(
-            "<h1>Acme Shop is not configured</h1>"
-            "<p>Set <code>SPEAKSECURE_API_KEY</code> in <code>config.py</code> "
-            "or as an environment variable.</p>",
-            status_code=500,
-        )
-
-    # token_urlsafe(32) gives 43 base64url characters of cryptographic
-    # randomness — well beyond what's needed for CSRF protection
-    state = secrets.token_urlsafe(32)
-    pending_states[state] = True
-
-    # Build the OAuth /authorize URL
-    params = {
-        "client_id": SPEAKSECURE_API_KEY,
-        "redirect_uri": REDIRECT_URI,
-        "state": state,
-    }
-    authorize_url = f"{SPEAKSECURE_BASE_URL}/api/v1/authorize?{urlencode(params)}"
-
-    response = RedirectResponse(url=authorize_url, status_code=302)
-    # Also set the state in a cookie — belt-and-braces protection.
-    # Even if the in-memory dict is wiped (server restart), the cookie
-    # check will still catch a forged state.
-    response.set_cookie(
-        key="acme_oauth_state",
-        value=state,
-        max_age=600,             # 10 minutes
-        httponly=True,
-        samesite="lax",
+@app.get("/login-not-configured", response_class=HTMLResponse)
+async def login_not_configured():
+    """Friendly error page if the operator forgot to set the API key."""
+    return HTMLResponse(
+        "<h1>Acme Shop is not configured</h1>"
+        "<p>Set <code>SPEAKSECURE_API_KEY</code> as an environment variable "
+        "(or in <code>config.py</code> for local development).</p>",
+        status_code=500,
     )
-    return response
 
 
 @app.get("/callback", response_class=HTMLResponse)
@@ -143,28 +144,25 @@ async def callback(
     code: str | None = None,
     state: str | None = None,
     error: str | None = None,
-    acme_oauth_state: str | None = Cookie(default=None),
 ):
     """
     OAuth callback. Receives ?code=...&state=... from SpeakSecure.
 
     Steps:
-      1. Validate state against what we issued (CSRF check)
+      1. Validate state against the server-side pending_states dict
+         (CSRF check). The state is stored only in memory because
+         the cookie approach would fail when the sign-in tab is a
+         different browsing context from the original Acme Shop tab.
       2. POST the code to SpeakSecure /token with our API key to
-         get back the user_id
-      3. Create a session, set cookie, redirect to /dashboard
+         get back the user_id.
+      3. Create a session, set cookie, redirect to /dashboard.
     """
     # --- 1. State validation (CSRF protection) ---
-    # Both the URL state AND the cookie state must match what we
-    # remembered server-side. Any mismatch → reject.
     if not state:
         raise HTTPException(status_code=400, detail="Missing state parameter.")
-    if state != acme_oauth_state:
-        # Cookie didn't match — possible CSRF attempt
-        raise HTTPException(status_code=400, detail="State mismatch (CSRF check failed).")
     if state not in pending_states:
-        # Unknown state — possible replay or forged request
-        raise HTTPException(status_code=400, detail="Unknown state.")
+        # Unknown or already-consumed state - possible replay or forgery
+        raise HTTPException(status_code=400, detail="Unknown or expired state.")
 
     # Mark state as consumed (one-time use)
     pending_states.pop(state, None)
@@ -235,8 +233,6 @@ async def callback(
         httponly=True,
         samesite="lax",
     )
-    # Clear the OAuth state cookie now that the flow is complete
-    response.delete_cookie(key="acme_oauth_state")
     return response
 
 
@@ -245,7 +241,7 @@ async def dashboard(
     request: Request,
     acme_session: str | None = Cookie(default=None),
 ):
-    """Protected page — only accessible after successful sign-in."""
+    """Protected page - only accessible after successful sign-in."""
     user_id = get_user_from_session(acme_session)
     if not user_id:
         return RedirectResponse(url="/", status_code=302)
